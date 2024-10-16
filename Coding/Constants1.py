@@ -123,7 +123,7 @@ LB_G_Coordinates = {0:(33.74385388204616, -118.2037048167187), 1:(33.74382794949
 LB_J_Coordinates = {0:(33.740620454682855, -118.19560676124748), 1:(33.74062045466779, -118.20240543368145), 2:(33.73656933377884, -118.19461326569127), 3:(33.73656933377884, -118.18574588396599)}
 
 
-PortLimitsCoordinates = {'Boston':{'maxLAT':42.45, 'minLAT':42.30,'maxLON':-70.65, 'minLON':-71.1}, 'NY':{'maxLAT':40.75, 'minLAT':40.40,'maxLON':-73.45, 'minLON':-74.3}, 'Portland_Me': {'maxLAT':43.7, 'minLAT':43.5,'maxLON':-69.9, 'minLON':-70.3}, 'Norfolk':{'maxLAT':37.10, 'minLAT':36.70,'maxLON':-75.60, 'minLON':-76.50} , 'Savanna':{'maxLAT':32.20, 'minLAT':31.90,'maxLON':-80.3, 'minLON':-81.2}, 'Baltimor':{'maxLAT':39.4, 'minLAT':36.9,'maxLON':-74.8, 'minLON':-76.7}}
+PortLimitsCoordinates = {'Boston':{'maxLAT':42.45, 'minLAT':42.30,'maxLON':-70.65, 'minLON':-71.1}, 'NY':{'maxLAT':40.75, 'minLAT':40.40,'maxLON':-73.45, 'minLON':-74.3}, 'Portland_Me': {'maxLAT':43.7, 'minLAT':43.5,'maxLON':-69.9, 'minLON':-70.3}, 'Norfolk':{'maxLAT':37.10, 'minLAT':36.70,'maxLON':-75.60, 'minLON':-76.50} , 'Savanna':{'maxLAT':32.20, 'minLAT':32.00,'maxLON':-80.7, 'minLON':-81.2}, 'Baltimor':{'maxLAT':39.4, 'minLAT':36.9,'maxLON':-74.8, 'minLON':-76.7}}
 
 PortAnchorages = {'Boston':BostonPortAnchorageArea, 'NY': NYPortAnchorageArea, 'Portland_Me': PortlandMePortAnchorageArea, 'Norfolk': NorfolkPortAnchorageArea, 'Savanna':SavannaPortAnchorageArea, 'Baltimor': BaltimorPortAnchorageArea}
 PortHarbour = {'Boston':BostonPortAquatory, 'NY': NYPortAquatory, 'Portland_Me':PortlandMePortAquatory, 'Norfolk':NorfolkPortAquatory, 'Savanna':SavannaPortAquatory, 'Baltimor':BaltimorPortAquatory}

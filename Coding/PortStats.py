@@ -251,13 +251,30 @@ def filteringBerth(year, month, daily = False):
     df["timeDiscrepancy"] = pd.to_datetime(df["BaseDateTime"]).dt.strftime(timePattern)
     #df = df[df["nearestPortDistance"] > 1000]
     #df = df[df["nearestPortDistance"] < 350000]
-    dfPortStatsGrouped = df.groupby(["timeDiscrepancy", "IMO", "nearestPort"]).agg(Length = ("Length", np.mean), Width =("Width", np.mean))
+    dfPortStatsGrouped = df.groupby(["timeDiscrepancy", "IMO", "nearestPort"]).agg(Length = ("Length", np.mean), Width =("Width", np.mean), LAT =("LAT", np.mean), LON =("LON", np.mean)  )
     dfPortStatsGrouped.reset_index(inplace=True)
     dfPortStatsGrouped = dfPortStatsGrouped.groupby(["timeDiscrepancy", "nearestPort"]).agg(count = ("IMO", np.size), Length = ("Length", np.sum), Width =("Width", np.mean))
     dfPortStatsGrouped.reset_index(inplace=True)
-    
-    dfPortVesselStats = df.groupby(["IMO", "VesselName", "nearestPort"]).agg(Length = ("Length", np.mean), Width =("Width", np.mean), start_time = ("BaseDateTime", np.min), end_time = ("BaseDateTime", np.max))
+    df["BaseDateTime"] = pd.to_datetime(df["BaseDateTime"])
+    df = df.sort_values(by=['IMO', 'VesselName', 'nearestPort', 'BaseDateTime'])    
+    df['diff'] = df.groupby(['IMO', 'VesselName', 'nearestPort'])['BaseDateTime'].diff()
+    df['new_group'] = (df['diff'] > pd.Timedelta(hours=24)).astype(int).cumsum()
+    # Group by the new group and calculate the aggregations
+    dfPortVesselStats = df.groupby(['IMO', 'VesselName', 'nearestPort', 'new_group']).agg(
+        Length=('Length', np.mean),
+        Width=('Width', np.mean),
+        LAT=('LAT', np.mean),
+        LON=('LON', np.mean),
+        Heading_min = ('Heading', 'min'),
+        Heading_max = ('Heading', 'max'),
+        Heading_mean = ('Heading', np.mean),
+        start_time=('BaseDateTime', 'min'),
+        end_time=('BaseDateTime', 'max')
+    )
     dfPortVesselStats.reset_index(inplace=True)
+
+#    dfPortVesselStats = df.groupby(["IMO", "VesselName", "nearestPort"]).agg(Length = ("Length", np.mean), Width =("Width", np.mean), start_time = ("BaseDateTime", np.min), end_time = ("BaseDateTime", np.max))
+#    dfPortVesselStats.reset_index(inplace=True)
     dfPortVesselStats["TimeSpent"] = dfPortVesselStats.apply(lambda x: (pd.to_datetime(x["end_time"])- pd.to_datetime(x["start_time"])).total_seconds()/3600, axis=1)
     
     dfPortStatsGrouped.to_csv(f"/home/gridsan/{con.userName}/Coding/BerthOnly/BerthOnly{year}{month}{tdSuffix}.csv")
@@ -350,6 +367,7 @@ def getAnchorageAreas_daily(df, ships, daily = True):
         timePattern = '%Y-%m-%d'
         tdSuffix = 'daily'        
         df = df[df['IMO'].isin(ships["IMO"])]
+        df["BaseDateTime"] = pd.to_datetime(df["BaseDateTime"])
         df["timeDiscrepancy"] = pd.to_datetime(df["BaseDateTime"]).dt.strftime(timePattern)
         anchorGrouped = []
         anchorVessels = []
@@ -368,8 +386,18 @@ def getAnchorageAreas_daily(df, ships, daily = True):
                 if len(df_anchorGrouped) > 0:
                     df_anchorGrouped["nearestPort"] = anchor
                     anchorGrouped.append(df_anchorGrouped)
-                dfAnchorVesselGrouped = df_anchor.groupby(["IMO", "VesselName"]).agg(start_time = ("BaseDateTime", np.min), end_time = ("BaseDateTime", np.max))
+                df_anchor = df_anchor.sort_values(by=['IMO', 'VesselName', 'BaseDateTime'])    
+                df_anchor['diff'] = df_anchor.groupby(['IMO', 'VesselName'])['BaseDateTime'].diff()
+                df_anchor['new_group'] = (df_anchor['diff'] > pd.Timedelta(hours=24)).astype(int).cumsum()
+    # Group by the new group and calculate the aggregations
+                dfAnchorVesselGrouped = df_anchor.groupby(['IMO', 'VesselName', 'new_group']).agg(
+                    start_time=('BaseDateTime', 'min'),
+                    end_time=('BaseDateTime', 'max')
+                )
                 dfAnchorVesselGrouped.reset_index(inplace=True)
+                    
+#                dfAnchorVesselGrouped = df_anchor.groupby(["IMO", "VesselName"]).agg(start_time = ("BaseDateTime", np.min), end_time = ("BaseDateTime", np.max))
+#                dfAnchorVesselGrouped.reset_index(inplace=True)
                 dfAnchorVesselGrouped["TimeSpent"] = dfAnchorVesselGrouped.apply(lambda x: (pd.to_datetime(x["end_time"])- pd.to_datetime(x["start_time"])).total_seconds()/3600, axis=1)                
                 
                 if len(dfAnchorVesselGrouped) > 0:
@@ -400,10 +428,10 @@ def buildPoligon():
 #getAnchorageAreas(2023, '09')
 
 def run_all(year, month):
-    runHarbour = True
-    runAnchor = False
+    runHarbour = False #True
+    runAnchor = True #False
     runInitial = False 
-    runFiltering = True
+    runFiltering = False
     tdSuffix = 'daily'
     #runInitial(year, month)
     ais_folder = f"/home/gridsan/{con.userName}/flow_shared/data/Marine_Cadaster_2015-2023/{year}"
@@ -444,7 +472,7 @@ def run_all(year, month):
     if runInitial and len(framesShipsData) > 0:
         ships_data = pd.concat(framesShipsData, ignore_index=True)
         saveResultedDataFile(ships_data, year, month)        
-    if runInitial and runFiltering:
+    if runFiltering: # runInitial and runFiltering:
         runFilteringBerths(year,month, True)
 
 #run_all(2015, '01')

@@ -56,9 +56,9 @@ def BerthVesselFileMerger(daily = False):
     resulted['group'] = (resulted['time_diff'] > 1).cumsum()
 
     last_row_mask = resulted.duplicated(['nearestPort', 'IMO', 'VesselName', 'group'], keep='last') | (resulted['group'] == resulted['group'].max())
-
+    print("hey")
 # Group by 'Port', 'Vessel', and 'group', then aggregate 'start_time' and 'end_time'
-    result = resulted[~last_row_mask].groupby(['nearestPort', 'IMO', 'VesselName', 'Length', 'Width', 'group']).agg({'start_time': 'min', 'end_time': 'max', 'TimeSpent': 'sum'}).reset_index()
+    result = resulted[~last_row_mask].groupby(['nearestPort', 'IMO', 'VesselName', 'Length', 'Width', 'group']).agg({'start_time': 'min', 'end_time': 'max', 'TimeSpent': 'sum', 'LAT':'mean', 'LON':'mean', 'Heading_min': 'min', 'Heading_max': 'max','Heading_mean': 'mean'}).reset_index()
     result.reset_index(inplace=True)  
     result.to_csv(f"{ais_folder}/ResultedVesselOnBerth.csv")
     return 0
@@ -179,4 +179,4 @@ AnchorVesselFileMerger(True)
 
 BerthStatsFileMerger(True)
 AnchorStatsFileMerger(True)
-HarborStatsFileMerger(True)
+#HarborStatsFileMerger(True)
